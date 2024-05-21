@@ -1,0 +1,67 @@
+% These codes are provided by Dr. Goan
+% https://www.academicblock.com
+
+function imageHistogramViewer
+    % Create a figure window
+    fig = figure('Name', 'Image Histogram Viewer', 'NumberTitle', 'off', ...
+                 'MenuBar', 'none', 'ToolBar', 'none', 'Position', [100, 100, 800, 600]);
+
+    % Add a panel for the image
+    imgPanel = uipanel('Parent', fig, 'Position', [0.1 0.4 0.35 0.55]);
+
+    % Add an axis to display the image
+    axImage = axes('Parent', imgPanel);
+    
+    % Add a panel for the histogram
+    histPanel = uipanel('Parent', fig, 'Position', [0.55 0.4 0.35 0.55]);
+
+    % Add an axis to display the histogram
+    axHist = axes('Parent', histPanel);
+    
+    % Add a button to upload an image
+    uploadButton = uicontrol('Style', 'pushbutton', 'String', 'Upload Image', ...
+                             'Position', [150, 50, 100, 30], 'Callback', @uploadImage);
+
+    % Add a button to save the image
+    saveButton = uicontrol('Style', 'pushbutton', 'String', 'Save Image', ...
+                           'Position', [550, 50, 100, 30], 'Callback', @saveImage);
+
+    % Initialize variable to store the image
+    img = [];
+
+    function uploadImage(~, ~)
+        % Let the user select an image file
+        [fileName, pathName] = uigetfile({'*.jpg;*.jpeg;*.png;*.bmp', 'Image Files'}, 'Select an Image');
+        if fileName == 0
+            return;
+        end
+        imgPath = fullfile(pathName, fileName);
+        img = imread(imgPath);
+        imshow(img, 'Parent', axImage);
+        title(axImage, 'Uploaded Image');
+        displayHistogram(img);
+    end
+
+    function displayHistogram(image)
+        % If the image is RGB, convert it to grayscale
+        if size(image, 3) == 3
+            grayImage = rgb2gray(image);
+        else
+            grayImage = image;
+        end
+        % Display the histogram
+        imhist(grayImage, 'Parent', axHist);
+        title(axHist, 'Intensity Histogram');
+    end
+
+    function saveImage(~, ~)
+        if isempty(img)
+            return;
+        end
+        [fileName, pathName] = uiputfile({'*.jpg', 'JPEG Image'; '*.png', 'PNG Image'; '*.bmp', 'Bitmap Image'}, 'Save Image As');
+        if fileName == 0
+            return;
+        end
+        imwrite(img, fullfile(pathName, fileName));
+    end
+end
